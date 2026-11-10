@@ -1,12 +1,11 @@
 import json
-from pathlib import Path
+
 import streamlit as st
-import pandas as pd
 
 from src.config import settings
+from src.engine.incident_analyzer import IncidentAnalyzer
 from src.rag.document_loader import DocumentLoader
 from src.rag.vector_store import SREVectorStore
-from src.engine.incident_analyzer import IncidentAnalyzer
 
 st.set_page_config(
     page_title="SRE Incident RAG & Observability Studio",

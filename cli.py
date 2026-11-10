@@ -1,22 +1,20 @@
 import json
-import sys
-from pathlib import Path
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
 from src.config import settings
+from src.engine.incident_analyzer import IncidentAnalyzer
 from src.rag.document_loader import DocumentLoader
 from src.rag.vector_store import SREVectorStore
-from src.engine.incident_analyzer import IncidentAnalyzer
 
 console = Console()
 
 @click.group()
 def cli():
     """SRE Incident RAG & Observability CLI."""
-    pass
 
 @cli.command()
 @click.argument("alert_path", type=click.Path(exists=True))
@@ -25,7 +23,7 @@ def diagnose(alert_path: str):
     with open(alert_path, "r", encoding="utf-8") as f:
         alert_data = json.load(f)
 
-    console.print(f"[bold cyan]🔍 Loading SRE Vector Index...[/bold cyan]")
+    console.print("[bold cyan]🔍 Loading SRE Vector Index...[/bold cyan]")
     vs = SREVectorStore()
     docs = DocumentLoader.load_all_sample_data(settings.sample_data_dir)
     vs.add_documents(docs)

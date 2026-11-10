@@ -1,16 +1,16 @@
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 from src.config import settings
+from src.engine.prompts import INCIDENT_ANALYSIS_USER_PROMPT, SRE_SYSTEM_PROMPT
 from src.rag.vector_store import SREVectorStore
-from src.engine.prompts import SRE_SYSTEM_PROMPT, INCIDENT_ANALYSIS_USER_PROMPT
 from src.telemetry.tracer import trace_span
 
 logger = logging.getLogger("sre_rag.engine")
 
 class IncidentAnalyzer:
-    def __init__(self, vector_store: Optional[SREVectorStore] = None):
+    def __init__(self, vector_store: SREVectorStore | None = None):
         self.vector_store = vector_store or SREVectorStore()
         self.api_key = settings.gemini_api_key
         self.model_name = settings.gemini_model
@@ -35,7 +35,7 @@ class IncidentAnalyzer:
             self.has_llm = False
             logger.info("Running in offline/local evaluation mode (no Gemini key configured).")
 
-    def analyze_incident(self, alert_payload: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_incident(self, alert_payload: dict[str, Any]) -> dict[str, Any]:
         incident_id = alert_payload.get("incident_id", "INC-UNKNOWN")
         service = alert_payload.get("service", "unknown-service")
         title = alert_payload.get("title", "")
@@ -79,7 +79,7 @@ class IncidentAnalyzer:
             # 4. Deterministic Local Evaluation Fallback (for instant testing without API key)
             return self._build_deterministic_rca(incident_id, alert_payload, trace_data, postmortem_hits, runbook_hits)
 
-    def _build_deterministic_rca(self, incident_id: str, alert: Dict[str, Any], trace_data: Dict[str, Any], postmortems: List[Dict], runbooks: List[Dict]) -> Dict[str, Any]:
+    def _build_deterministic_rca(self, incident_id: str, alert: dict[str, Any], trace_data: dict[str, Any], postmortems: list[dict], runbooks: list[dict]) -> dict[str, Any]:
         error_msg = trace_data.get("error_message", "").lower()
         service = alert.get("service", "core-service")
         

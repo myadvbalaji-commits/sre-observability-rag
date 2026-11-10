@@ -1,13 +1,14 @@
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
+
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from src.config import settings
-from src.telemetry.tracer import init_tracer, trace_span
+from src.engine.incident_analyzer import IncidentAnalyzer
 from src.rag.document_loader import DocumentLoader
 from src.rag.vector_store import SREVectorStore
-from src.engine.incident_analyzer import IncidentAnalyzer
+from src.telemetry.tracer import init_tracer, trace_span
 
 # Initialize telemetry
 init_tracer()
@@ -36,10 +37,10 @@ class AlertPayload(BaseModel):
     title: str
     severity: str
     service: str
-    status: Optional[str] = "FIRING"
-    environment: Optional[str] = "production"
-    metrics: Optional[Dict[str, Any]] = None
-    trace_sample: Optional[Dict[str, Any]] = None
+    status: str | None = "FIRING"
+    environment: str | None = "production"
+    metrics: dict[str, Any] | None = None
+    trace_sample: dict[str, Any] | None = None
 
 @app.get("/health")
 def health_check():
@@ -64,7 +65,7 @@ def analyze_incident_endpoint(payload: AlertPayload):
 def search_knowledge_base(
     q: str = Query(..., description="Query string for postmortems and runbooks"),
     top_k: int = Query(3, ge=1, le=10),
-    doc_type: Optional[str] = Query(None, description="Filter by 'postmortem' or 'runbook'")
+    doc_type: str | None = Query(None, description="Filter by 'postmortem' or 'runbook'")
 ):
     with trace_span("api.search_knowledge", {"query": q, "top_k": top_k}):
         return {

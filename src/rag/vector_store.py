@@ -1,5 +1,6 @@
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import numpy as np
 
 from src.config import settings
@@ -10,12 +11,12 @@ from src.telemetry.tracer import trace_span
 logger = logging.getLogger("sre_rag.vector_store")
 
 class SREVectorStore:
-    def __init__(self, persist_directory: Optional[str] = None):
+    def __init__(self, persist_directory: str | None = None):
         self.persist_directory = persist_directory or settings.chroma_persist_directory
         self.collection_name = settings.chroma_collection_name
         self.embedding_service = EmbeddingService()
-        self.documents: Dict[str, Document] = {}
-        self.embeddings: Dict[str, List[float]] = {}
+        self.documents: dict[str, Document] = {}
+        self.embeddings: dict[str, list[float]] = {}
         self._init_chroma()
 
     def _init_chroma(self):
@@ -32,7 +33,7 @@ class SREVectorStore:
             logger.warning(f"ChromaDB persistence initialization fallback to in-memory: {e}")
             self.use_chroma = False
 
-    def add_documents(self, docs: List[Document]):
+    def add_documents(self, docs: list[Document]):
         with trace_span("vector_store.add_documents", {"doc.count": len(docs)}):
             if not docs:
                 return
@@ -57,7 +58,7 @@ class SREVectorStore:
                 except Exception as ex:
                     logger.warning(f"Chroma upsert failed ({ex}), retained in in-memory index.")
 
-    def search(self, query: str, top_k: int = 3, filter_doc_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int = 3, filter_doc_type: str | None = None) -> list[dict[str, Any]]:
         with trace_span("vector_store.search", {"query": query, "top_k": top_k, "filter": str(filter_doc_type)}):
             query_emb = self.embedding_service.embed_query(query)
             
@@ -73,7 +74,7 @@ class SREVectorStore:
                     hits = []
                     if results and "ids" in results and results["ids"]:
                         for i, doc_id in enumerate(results["ids"][0]):
-                            distance = results["distances"][0][i] if "distances" in results and results["distances"] else 0.0
+                            distance = results["distances"][0][i] if results.get("distances") else 0.0
                             similarity = 1.0 / (1.0 + distance)
                             meta = results["metadatas"][0][i] if results.get("metadatas") else {}
                             content = results["documents"][0][i] if results.get("documents") else ""

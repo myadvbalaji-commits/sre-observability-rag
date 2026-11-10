@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import Optional, Dict, Any
+from typing import Any
 
 from src.config import settings
 
@@ -8,10 +8,9 @@ logger = logging.getLogger("sre_rag.telemetry")
 
 try:
     from opentelemetry import trace
+    from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    from opentelemetry.sdk.resources import Resource
-    from opentelemetry.trace import Status, StatusCode
     HAS_OTEL = True
 except ImportError:
     trace = None
@@ -37,7 +36,7 @@ class DummyTracer:
         span = DummySpan(name)
         yield span
 
-def init_tracer(service_name: Optional[str] = None):
+def init_tracer(service_name: str | None = None):
     svc_name = service_name or settings.otel_service_name
     if not HAS_OTEL:
         logger.info("OpenTelemetry SDK not installed in environment; using local trace stub.")
@@ -52,7 +51,9 @@ def init_tracer(service_name: Optional[str] = None):
     provider = TracerProvider(resource=resource)
 
     try:
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
+            OTLPSpanExporter,
+        )
         otlp_exporter = OTLPSpanExporter(
             endpoint=settings.otel_exporter_otlp_endpoint,
             insecure=settings.otel_exporter_otlp_insecure,
@@ -70,7 +71,7 @@ def get_tracer():
     return trace.get_tracer(settings.otel_service_name)
 
 @contextmanager
-def trace_span(name: str, attributes: Optional[Dict[str, Any]] = None):
+def trace_span(name: str, attributes: dict[str, Any] | None = None):
     """Context manager to create OpenTelemetry spans with standardized SRE GenAI attributes."""
     tracer = get_tracer()
     with tracer.start_as_current_span(name) as span:

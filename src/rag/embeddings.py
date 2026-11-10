@@ -1,6 +1,6 @@
 import hashlib
 import logging
-from typing import List
+
 import numpy as np
 
 from src.config import settings
@@ -28,7 +28,7 @@ class EmbeddingService:
             self.has_genai = False
             logger.info("No Gemini API key supplied; using deterministic local embedding fallback.")
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         with trace_span("rag.embeddings.batch", {"batch.size": len(texts), "model": self.model}):
             if self.has_genai:
                 try:
@@ -47,7 +47,7 @@ class EmbeddingService:
             
             return [self._local_fallback_embed(t) for t in texts]
 
-    def embed_query(self, query: str) -> List[float]:
+    def embed_query(self, query: str) -> list[float]:
         with trace_span("rag.embeddings.query", {"query.length": len(query), "model": self.model}):
             if self.has_genai:
                 try:
@@ -63,7 +63,7 @@ class EmbeddingService:
             return self._local_fallback_embed(query)
 
     @staticmethod
-    def _local_fallback_embed(text: str, dim: int = 768) -> List[float]:
+    def _local_fallback_embed(text: str, dim: int = 768) -> list[float]:
         """Deterministic 768-dim pseudo-semantic vector embedding for testing & zero-dependency local runs."""
         words = text.lower().split()
         vec = np.zeros(dim, dtype=np.float32)

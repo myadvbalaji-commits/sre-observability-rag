@@ -1,15 +1,15 @@
-import os
 import re
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
+
 
 class Document:
-    def __init__(self, doc_id: str, content: str, metadata: Dict[str, Any]):
+    def __init__(self, doc_id: str, content: str, metadata: dict[str, Any]):
         self.doc_id = doc_id
         self.content = content
         self.metadata = metadata
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "doc_id": self.doc_id,
             "content": self.content,
@@ -20,8 +20,8 @@ class DocumentLoader:
     """Parses SRE Postmortems, SOP Runbooks, and Alert definitions."""
 
     @staticmethod
-    def parse_markdown_metadata(content: str) -> Dict[str, Any]:
-        metadata: Dict[str, Any] = {}
+    def parse_markdown_metadata(content: str) -> dict[str, Any]:
+        metadata: dict[str, Any] = {}
         for line in content.splitlines():
             match = re.match(r"^[-*]\s+\*\*([^:]+):\*\*\s*(.+)$", line.strip())
             if match:
@@ -31,8 +31,8 @@ class DocumentLoader:
         return metadata
 
     @classmethod
-    def load_directory(cls, dir_path: Path, doc_type: str) -> List[Document]:
-        documents: List[Document] = []
+    def load_directory(cls, dir_path: Path, doc_type: str) -> list[Document]:
+        documents: list[Document] = []
         if not dir_path.exists():
             return documents
 
@@ -54,8 +54,8 @@ class DocumentLoader:
         return documents
 
     @classmethod
-    def load_all_sample_data(cls, base_sample_dir: Path) -> List[Document]:
-        docs: List[Document] = []
+    def load_all_sample_data(cls, base_sample_dir: Path) -> list[Document]:
+        docs: list[Document] = []
         postmortem_dir = base_sample_dir / "postmortems"
         runbook_dir = base_sample_dir / "runbooks"
 

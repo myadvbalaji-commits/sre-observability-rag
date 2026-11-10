@@ -1,5 +1,7 @@
 from pathlib import Path
-from src.rag.document_loader import DocumentLoader, Document
+
+from src.rag.document_loader import DocumentLoader
+
 
 def test_parse_markdown_metadata():
     sample_md = """# Postmortem

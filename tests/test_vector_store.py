@@ -1,6 +1,7 @@
 from src.rag.document_loader import Document
 from src.rag.vector_store import SREVectorStore
 
+
 def test_vector_store_add_and_search():
     store = SREVectorStore(persist_directory=None)
     doc1 = Document(

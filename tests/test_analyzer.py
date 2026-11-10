@@ -1,6 +1,7 @@
 from src.engine.incident_analyzer import IncidentAnalyzer
 from src.rag.vector_store import SREVectorStore
 
+
 def test_incident_analyzer_pipeline():
     store = SREVectorStore()
     analyzer = IncidentAnalyzer(vector_store=store)
