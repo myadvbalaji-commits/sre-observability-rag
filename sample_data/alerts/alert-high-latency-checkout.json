@@ -1,0 +1,33 @@
+{
+  "incident_id": "INC-8941",
+  "title": "High HTTP 502 Rate and Pod Restarts in checkout-service",
+  "severity": "P1",
+  "status": "FIRING",
+  "service": "checkout-service",
+  "environment": "production",
+  "timestamp": "2026-11-09T18:00:00Z",
+  "alert_labels": {
+    "alertname": "PodOOMKilledRateHigh",
+    "cluster": "us-east-prod-k8s",
+    "namespace": "production",
+    "deployment": "checkout-service"
+  },
+  "metrics": {
+    "error_rate": "18.4%",
+    "p99_latency_ms": 4200,
+    "restart_count_5m": 14,
+    "memory_usage_ratio": "0.98"
+  },
+  "trace_sample": {
+    "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "root_span_name": "POST /api/v1/checkout",
+    "failing_span": "checkout-service.processOrder",
+    "error_message": "Command terminated: exit status 137 (OOMKilled)",
+    "span_attributes": {
+      "http.status_code": 502,
+      "service.name": "checkout-service",
+      "k8s.pod.restart_reason": "OOMKilled",
+      "k8s.container.memory_limit": "512Mi"
+    }
+  }
+}
